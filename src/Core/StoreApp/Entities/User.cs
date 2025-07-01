@@ -18,7 +18,8 @@ public class User : BaseEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     // Navigation
-    public ICollection<Order> Orders { get; set; } = new List<Order>();
+    public ICollection<Product> Products { get; set; }
+    public ICollection<Favorite> Favorites { get; set; }
 
 
 }

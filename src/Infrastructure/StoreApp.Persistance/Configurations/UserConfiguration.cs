@@ -15,26 +15,36 @@ namespace StoreApp.Persistence.Configurations
         {
             builder.HasKey(u => u.Id);
 
+            // Required fields
             builder.Property(u => u.UserName)
                 .IsRequired()
                 .HasMaxLength(100);
 
             builder.Property(u => u.Email)
                 .IsRequired()
-                .HasMaxLength(200);
+                .HasMaxLength(150);
 
             builder.Property(u => u.PasswordHash)
                 .IsRequired();
 
+            // Optional field
             builder.Property(u => u.FullName)
-                .HasMaxLength(200);
+                .HasMaxLength(150);
 
+            // Defaults
             builder.Property(u => u.CreatedAt)
-                .HasDefaultValueSql("GETUTCDATE()");
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            builder.HasMany(u => u.Orders)
-                   .WithOne(o => o.User)
-                   .HasForeignKey(o => o.UserId);
+            // Relationships
+            builder.HasMany(u => u.Products)
+                .WithOne(p => p.User)
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(u => u.Favorites)
+                .WithOne(f => f.User)
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

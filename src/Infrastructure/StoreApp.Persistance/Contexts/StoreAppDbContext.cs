@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StoreApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,8 +20,11 @@ public class StoreAppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
 
     }
-
-    // Define DbSets for your entities here, e.g.:
-    // public DbSet<Product> Products { get; set; }
-    // public DbSet<Category> Categories { get; set; }
+    public DbSet<Category> Categories { get; set; }
+    public DbSet<User> Users { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderProduct> OrderProducts { get; set; }
+    public DbSet<Image> Images { get; set; }
+    public DbSet<Favorite> Favorites { get; set; }
 }

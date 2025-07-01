@@ -25,9 +25,9 @@ namespace YourProject.Infrastructure.Persistence.Configurations
                 .HasMaxLength(500);
 
             builder.HasMany(c => c.Products)
-                   .WithOne(p => p.Category)
-                   .HasForeignKey(p => p.CategoryId);
-                   
+                .WithOne(p => p.Category)
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }
