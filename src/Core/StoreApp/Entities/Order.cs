@@ -8,14 +8,10 @@ namespace StoreApp.Domain.Entities;
 
 public class Order : BaseEntity
 {
-  
-    public DateTime OrderDate { get; set; } = DateTime.UtcNow;
-    public decimal TotalAmount { get; set; }
-
-    // Foreign Keys
+    public string OrderStatus { get; set; } = null!;
+    public DateTime OrderDate { get; set; }
     public int UserId { get; set; }
+    public User user { get; set; }
+    public ICollection<OrderProduct> OrderProducts { get; set; }
 
-    // Navigation
-    public User User { get; set; } = null!;
-    public ICollection<Product> Products { get; set; } = new List<Product>();
 }

@@ -15,15 +15,22 @@ namespace StoreApp.Persistence.Configurations
         {
             builder.HasKey(o => o.Id);
 
+            builder.Property(o => o.OrderStatus)
+                .IsRequired()
+                .HasMaxLength(50);
+
             builder.Property(o => o.OrderDate)
-                .IsRequired();
+                .HasDefaultValueSql("CURRENT_TIMESTAMP");
 
-            builder.Property(o => o.TotalAmount)
-                .HasColumnType("decimal(18,2)");
+            builder.HasOne(o => o.user)
+                .WithMany()
+                .HasForeignKey(o => o.UserId)
+                .OnDelete(DeleteBehavior.Restrict);
 
-            builder.HasOne(o => o.User)
-                   .WithMany(u => u.Orders)
-                   .HasForeignKey(o => o.UserId);
+            builder.HasMany(o => o.OrderProducts)
+                .WithOne(op => op.Order)
+                .HasForeignKey(op => op.OrderId)
+                .OnDelete(DeleteBehavior.Restrict);
 
         }
     }
