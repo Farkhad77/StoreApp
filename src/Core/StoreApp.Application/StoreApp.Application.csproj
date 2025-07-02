@@ -11,8 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Abstracts\Services\" />
-    <Folder Include="DTOs\" />
+    <Folder Include="DTOs\UserDtos\" />
     <Folder Include="Validations\" />
   </ItemGroup>
 

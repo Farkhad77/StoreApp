@@ -25,11 +25,13 @@ namespace StoreApp.Persistence.Repositories
 
         public async Task AddAsync(T entity)
         {
+            entity.CreatedAt = DateTime.UtcNow;
             await Table.AddAsync(entity);
         }
 
         public void Update(T entity)
         {
+            entity.UpdatedAt = DateTime.UtcNow;
             Table.Update(entity);
         }
 
