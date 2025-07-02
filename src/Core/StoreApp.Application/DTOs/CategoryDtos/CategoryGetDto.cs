@@ -8,6 +8,6 @@ namespace StoreApp.Application.DTOs.CategoryDtos
 {
     public record class CategoryGetDto
     {
-        public int Id { get; set; } 
+        public Guid Id { get; set; } 
     }
 }

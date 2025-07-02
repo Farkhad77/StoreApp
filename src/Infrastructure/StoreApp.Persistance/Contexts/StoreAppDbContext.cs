@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using StoreApp.Domain.Entities;
 using System;
 using System.Collections.Generic;
@@ -8,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace StoreApp.Persistence.Contexts;
 
-public class StoreAppDbContext : DbContext
+public class StoreAppDbContext : IdentityDbContext<User>
 {
     public StoreAppDbContext(DbContextOptions<StoreAppDbContext> options) : base(options)
     {
@@ -21,7 +22,7 @@ public class StoreAppDbContext : DbContext
 
     }
     public DbSet<Category> Categories { get; set; }
-    public DbSet<User> Users { get; set; }
+    
     public DbSet<Product> Products { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderProduct> OrderProducts { get; set; }

@@ -31,9 +31,8 @@ namespace StoreApp.Persistence.Configurations
             builder.Property(u => u.FullName)
                 .HasMaxLength(150);
 
-            // Defaults
-            builder.Property(u => u.CreatedAt)
-                .HasDefaultValueSql("CURRENT_TIMESTAMP");
+           
+           
 
             // Relationships
             builder.HasMany(u => u.Products)

@@ -10,7 +10,7 @@ namespace StoreApp.Domain.Entities
     {
        
         public string Image_Url { get; set; } // Əgər bu URL-dirsə, string tip olmalıdır!
-        public int ProductId { get; set; }
+        public Guid ProductId { get; set; }
 
         public Product Product { get; set; }
     }

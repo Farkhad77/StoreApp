@@ -8,6 +8,6 @@ namespace StoreApp.Application.DTOs.ProductDtos
 {
     public record class ProductGetDto
     {
-        public int Id { get; set; }
+        public Guid Id { get; set; }
     }
 }
