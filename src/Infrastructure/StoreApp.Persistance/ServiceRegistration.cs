@@ -17,7 +17,7 @@ namespace StoreApp.Persistence
         {
             #region Repositories
             services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IUserRepository,UserRepository>();
+           
             services.AddScoped<IOrderRepository,OrderRepository>();
             services.AddScoped<IProductRepository,ProductRepository>();
             services.AddScoped<IFavoriteRepository,FavoriteRepository>();

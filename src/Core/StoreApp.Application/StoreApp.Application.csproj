@@ -7,12 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\StoreApp\StoreApp.Domain.csproj" />
+    <PackageReference Include="FluentValidation" Version="12.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DTOs\UserDtos\" />
-    <Folder Include="Validations\" />
+    <ProjectReference Include="..\StoreApp\StoreApp.Domain.csproj" />
   </ItemGroup>
 
 </Project>
