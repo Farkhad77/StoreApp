@@ -11,5 +11,7 @@ namespace StoreApp.Application.Abstracts.Services
     public interface IUserService
     {
         Task<BaseResponse<string>> RegisterAsync(UserRegisterDto dto);
+        Task<BaseResponse<TokenResponse>> Login(UserLoginDto dto);
+
     }
 }
