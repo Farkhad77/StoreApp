@@ -12,7 +12,7 @@ using StoreApp.Persistence.Contexts;
 namespace StoreApp.Persistence.Migrations
 {
     [DbContext(typeof(StoreAppDbContext))]
-    [Migration("20250702163213_Initial")]
+    [Migration("20250703165825_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -371,6 +371,9 @@ namespace StoreApp.Persistence.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasMaxLength(150)
@@ -399,6 +402,9 @@ namespace StoreApp.Persistence.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
