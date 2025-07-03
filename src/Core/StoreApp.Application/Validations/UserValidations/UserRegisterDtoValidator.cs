@@ -12,7 +12,7 @@ namespace StoreApp.Application.Validations.UserValidations
     {
         public UserRegisterDtoValidator()
         {
-            RuleFor(x => x.Fullname)
+            RuleFor(x => x.FullName)
                 .NotEmpty().WithMessage("Fullname is required.")
                 .MinimumLength(3).WithMessage("Fullname must be at least 3 characters long.")
                 .MaximumLength(50).WithMessage("Fullname must not exceed 50 characters.");
@@ -25,6 +25,7 @@ namespace StoreApp.Application.Validations.UserValidations
             RuleFor(x => x.Email)
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
+    
         }
     }
 }

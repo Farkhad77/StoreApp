@@ -1,4 +1,5 @@
 ﻿using StoreApp.Application.DTOs.UserDtos;
+using StoreApp.Application.Shared;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace StoreApp.Application.Abstracts.Services
 {
     public interface IUserService
     {
-        Task RegisterAsync(UserRegisterDto dto);
+        Task<BaseResponse<string>> RegisterAsync(UserRegisterDto dto);
     }
 }
