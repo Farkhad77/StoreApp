@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.CategoryDtos;
 using StoreApp.Application.Shared;
@@ -28,6 +29,16 @@ namespace StoreApp.WebApi.Controllers
         {
             var category = await _categoryService.GetByIdAsync(id);
             return StatusCode((int)category.StatusCode, category);
+        }
+        [HttpPost("custom-route")]
+        [Authorize]
+        [ProducesResponseType(typeof(BaseResponse<CategoryUpdateDto>), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Post([FromBody] CategoryCreateDto dto)
+        {
+            var result = await _categoryService.AddAsync(dto);
+            return StatusCode((int)result.StatusCode, result);
         }
 
         // GET api/<CategoriesController>/5

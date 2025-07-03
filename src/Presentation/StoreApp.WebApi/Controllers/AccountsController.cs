@@ -18,13 +18,22 @@ namespace StoreApp.WebApi.Controllers
             _userService = userService;
 
         }
-        [HttpPost]
+        [HttpPost("create")]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Register([FromBody] UserRegisterDto dto)
         {
             var result = await _userService.RegisterAsync(dto);
+            return StatusCode((int)result.StatusCode, result);
+        }
+        [HttpPost]
+        [ProducesResponseType(typeof(BaseResponse<TokenResponse>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.InternalServerError)]
+        public async Task<IActionResult> Login([FromBody] UserLoginDto dto)
+        {
+            var result = await _userService.Login(dto);
             return StatusCode((int)result.StatusCode, result);
         }
 

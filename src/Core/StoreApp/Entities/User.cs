@@ -12,7 +12,8 @@ public class User :  IdentityUser
    
 
     public string FullName { get; set; }
-
+    public string? RefreshToken { get; set; } 
+    public DateTime? ExpiryDate { get; set; } // Refresh token üçün istifadə olunur
 
     // Navigation
     public ICollection<Product> Products { get; set; }
