@@ -23,12 +23,15 @@ namespace StoreApp.Persistence.Services
         private readonly UserManager<User> _userManager;
         private readonly SignInManager<User> _signInManager;
         private readonly JWTSettings _jwtSetting;
+        private readonly RoleManager<IdentityRole> _roleManager;
 
-        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, IOptions<JWTSettings> jwtSetting)
+        public UserService(UserManager<User> userManager, SignInManager<User> signInManager, 
+            IOptions<JWTSettings> jwtSetting, RoleManager<IdentityRole> roleManager)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtSetting = jwtSetting.Value;
+            _roleManager = roleManager;
         }
 
         public async Task<BaseResponse<string>> RegisterAsync(UserRegisterDto dto)
@@ -52,6 +55,16 @@ namespace StoreApp.Persistence.Services
                 var errorsMessage = string.Join(";", identityResult.Errors.Select(e => e.Description));
                 return new BaseResponse<string>(errorsMessage, HttpStatusCode.BadRequest);
             }
+
+            var roleName = dto.Role.ToString();
+
+            // ✅ Əgər rol mövcud deyilsə, qeydiyyat uğursuz olur
+            if (!await _roleManager.RoleExistsAsync(roleName))
+            {
+                return new BaseResponse<string>($"Role '{roleName}' is not available", HttpStatusCode.BadRequest);
+            }
+
+            await _userManager.AddToRoleAsync(newUser, roleName);
 
             return new BaseResponse<string>("Email registered successfully", HttpStatusCode.Created);
         }
@@ -116,7 +129,55 @@ namespace StoreApp.Persistence.Services
                 ExpireDate = tokenDescriptor.Expires!.Value
             };
         }
+        public async Task<BaseResponse<TokenResponse>> RefreshTokenAsync(RefreshTokenRequest request)
+        {
+            var principal = GetPrincipalFromExpiredToken(request.AccessToken);
+            if (principal == null)
+                return new("Invalid access token", null, HttpStatusCode.Unauthorized);
 
+            var userId = principal.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            var user = await _userManager.FindByIdAsync(userId!);
+
+            if (user == null)
+                return new("User not found", null, HttpStatusCode.NotFound);
+
+            if (user.RefreshToken is null || user.RefreshToken != request.RefreshToken || user.ExpiryDate < DateTime.UtcNow)
+                return new("Invalid refresh token", null, HttpStatusCode.BadRequest);
+
+            var newAccessToken = await GenerateTokensAsync(user);
+            return new("Token refreshed", newAccessToken, HttpStatusCode.OK);
+        }
+
+        private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = false, // Token-in vaxtını yoxlama
+                ValidIssuer = _jwtSetting.Issuer,
+                ValidAudience = _jwtSetting.Audience,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwtSetting.SecretKey))
+            };
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+            try
+            {
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+
+                if (securityToken is not JwtSecurityToken jwtSecurityToken ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                    return null;
+
+                return principal;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+      
         private string GenerateRefreshToken()
         {
             var randomNumber = new byte[64];

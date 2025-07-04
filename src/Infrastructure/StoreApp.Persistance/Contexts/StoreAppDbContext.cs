@@ -28,4 +28,5 @@ public class StoreAppDbContext : IdentityDbContext<User>
     public DbSet<OrderProduct> OrderProducts { get; set; }
     public DbSet<Image> Images { get; set; }
     public DbSet<Favorite> Favorites { get; set; }
+    public DbSet<Review> Reviews { get; set; }
 }
