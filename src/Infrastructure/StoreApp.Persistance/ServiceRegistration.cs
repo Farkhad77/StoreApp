@@ -30,6 +30,7 @@ namespace StoreApp.Persistence
             services.AddScoped<IProductService, ProductService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IOrderService, OrderService>();
+            services.AddScoped<IRoleService, RoleService>();
            
             #endregion
 

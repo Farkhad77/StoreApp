@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace StoreApp.Application.Shared
 {
@@ -26,12 +27,19 @@ namespace StoreApp.Application.Shared
             public const string Create = "Product.Create";
             public const string Update = "Product.Update";
             public const string Delete = "Product.Delete";
+            public const string GetMyProducts = "Product.GetMyProducts";
+            public const string DeleteImage = "Product.DeleteImage";
+            public const string AddImage = "Product.AddImage";
 
             public static List<string> All = new()
            {
               Create,
               Update,
-              Delete
+              Delete,
+              GetMyProducts,
+              AddImage,
+              DeleteImage
+
            };
         }
         public static class Order
@@ -39,27 +47,72 @@ namespace StoreApp.Application.Shared
             public const string Create = "Order.Create";
             public const string Update = "Order.Update";
             public const string Delete = "Order.Delete";
-
+            public const string GetAll = "Order.GetAll";
+            public const string GetMyOrders = "Order.GetMyOrders";
+            public const string GetMySales = "Order.GetMySales";
+            public const string GetDetail = "Order.GetDetail";
             public static List<string> All = new()
            {
               Create,
               Update,
-              Delete
+              Delete,
+              GetAll,
+              GetMyOrders,
+              GetMySales,
+              GetDetail
            };
         }
-        public static class Favorite
+        public static class Account
         {
-            public const string Add = "Favorite.Add";
-            
-            public const string Delete = "Favorite.Delete";
+            public const string AddRole = "Account.AddRole";
+            public const string Create = "Account.Create";
 
             public static List<string> All = new()
            {
-                Add,
-                Delete
-
+              Create,
+              AddRole
            };
+        } 
+        public static class Role
+        {
+            public const string Create = "Role.Create";
+            public const string Update = "Role.Update";
+            public const string Delete = "Role.Delete";
+            public const string GetAllPermissions = "Role.GetAllPermissions";
+            public static List<string> All = new()
+            {
+                Create,
+                Update,
+                Delete,
+                GetAllPermissions
+            };
         }
+        public static class User
+        {
+            public const string Create = "User.Create";
+            public const string ResetPassword = "User.ResetPassword";
+            public const string GetAll = "User.GetAll";
+            public const string GetById = "User.GetById";
+            public static List<string> All = new()
+            {
+                Create,
+                ResetPassword,
+                GetAll,
+                GetById
+            };
+        }
+        public static class Review
+        {
+            public const string Create = "Review.Create";
+            
+            public const string Delete = "Review.Delete";
+            public static List<string> All = new()
+            {
+                Create,             
+                Delete
+            };
+        }
+
 
     }
 }
