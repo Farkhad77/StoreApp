@@ -3,6 +3,7 @@ using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Persistence.Repositories;
 using StoreApp.Persistence.Services;
+using StoreApp.Persistence.Services.StoreApp.Persistence.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +28,7 @@ namespace StoreApp.Persistence
             #region Services
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<IProductService,ProductService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IRoleService, RoleService>();

@@ -11,6 +11,7 @@ namespace StoreApp.Application.DTOs.ProductDtos
         public Guid Id { get; set; }
         public string Name { get; set; } 
         public int Price { get; set; }
+        public string UserId { get; set; }
         public string Description { get; set; }
         public int Stock { get; set; }
         public Guid CategoryId { get; set; }

@@ -20,16 +20,8 @@ namespace StoreApp.WebApi.Controllers
             _categoryService = categoryService;
         }
         private ICategoryService _categoryService { get; }
-        // GET: api/<CategoriesController>
-        [HttpGet]
-        [ProducesResponseType(typeof(BaseResponse<CategoryGetDto>), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetByIdAsync([FromQuery] Guid id)
-        {
-            var category = await _categoryService.GetByIdAsync(id);
-            return StatusCode((int)category.StatusCode, category);
-        }
+      
+       
         [HttpPost("custom-route")]
         [Authorize]
         [ProducesResponseType(typeof(BaseResponse<CategoryUpdateDto>), (int)HttpStatusCode.Created)]
@@ -42,28 +34,29 @@ namespace StoreApp.WebApi.Controllers
         }
 
         // GET api/<CategoriesController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+        [HttpGet]
+        public async Task<IActionResult> GetAll()
         {
-            return "value";
+            var result = await _categoryService.GetAllAsync();
+            return StatusCode((int)result.StatusCode, result);
         }
 
-        // POST api/<CategoriesController>
+
         [HttpPost]
-        public void Post([FromBody] string value)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Create([FromBody] CategoryCreateDto dto)
         {
+            var result = await _categoryService.AddAsync(dto);
+            return StatusCode((int)result.StatusCode, result);
         }
 
-        // PUT api/<CategoriesController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<CategoriesController>/5
+       
         [HttpDelete("{id}")]
-        public void Delete(int id)
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> Delete(Guid id)
         {
+            var result = await _categoryService.DeleteAsync(id);
+            return StatusCode((int)result.StatusCode, result);
         }
     }
 }
