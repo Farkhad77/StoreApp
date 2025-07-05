@@ -27,7 +27,7 @@ namespace StoreApp.Application.Validations.UserValidations
                 .NotEmpty().WithMessage("Email is required.")
                 .EmailAddress().WithMessage("Invalid email format.");
             RuleFor(x => x.Role)
-            .Must(role => role == UserRole.Buyer || role == UserRole.Seller)
+            .Must(role => role == UserRole.Buyer || role == UserRole.Seller )
             .WithMessage("Role must be either 'Buyer' or 'Seller' for registration.");
 
         }

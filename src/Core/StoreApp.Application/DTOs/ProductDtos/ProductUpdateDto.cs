@@ -9,7 +9,7 @@ namespace StoreApp.Application.DTOs.ProductDtos
     public record class ProductUpdateDto
     {
         public Guid Id { get; set; }
-        public string UserId { get; set; } = null!;
+      
         public string Name { get; set; }
         public int Price { get; set; }
         public string Description { get; set; }
