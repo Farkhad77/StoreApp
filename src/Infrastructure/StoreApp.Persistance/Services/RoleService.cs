@@ -57,5 +57,27 @@ namespace StoreApp.Persistence.Services
 
             return new BaseResponse<string?>("Role created successfully", true, HttpStatusCode.Created);
         }
+        public async Task<BaseResponse<string?>> DeleteRole(RoleDeleteDto dto)
+        {
+            if (string.IsNullOrWhiteSpace(dto.Name))
+            {
+                return new BaseResponse<string?>("Role name is required", HttpStatusCode.BadRequest);
+            }
+
+            var role = await _roleManager.FindByNameAsync(dto.Name);
+            if (role == null)
+            {
+                return new BaseResponse<string?>($"Role with name '{dto.Name}' not found", HttpStatusCode.NotFound);
+            }
+
+            var result = await _roleManager.DeleteAsync(role);
+            if (!result.Succeeded)
+            {
+                var errors = string.Join("; ", result.Errors.Select(e => e.Description));
+                return new BaseResponse<string?>(errors, HttpStatusCode.BadRequest);
+            }
+
+            return new BaseResponse<string?>($"Role '{dto.Name}' has been deleted successfully", true, HttpStatusCode.OK);
+        }
     }
 }

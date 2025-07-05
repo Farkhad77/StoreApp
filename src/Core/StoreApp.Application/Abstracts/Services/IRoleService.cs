@@ -11,6 +11,7 @@ namespace StoreApp.Application.Abstracts.Services
     public interface IRoleService
     {
         Task<BaseResponse<string?>> CreateRole(RoleCreateDto dto);
+        Task<BaseResponse<string?>> DeleteRole(RoleDeleteDto dto);
     }
 
 }

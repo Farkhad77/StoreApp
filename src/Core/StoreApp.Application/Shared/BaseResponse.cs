@@ -15,9 +15,9 @@ namespace StoreApp.Application.Shared
         public HttpStatusCode StatusCode { get; set; }
 
 
-        public BaseResponse(HttpStatusCode statusCode)
+        public BaseResponse (HttpStatusCode statusCode)
         {
-            Success = true;
+            
             StatusCode = statusCode;
         }
         public BaseResponse(string message, HttpStatusCode statusCode)
