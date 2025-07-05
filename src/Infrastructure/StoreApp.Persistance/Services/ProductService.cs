@@ -27,13 +27,15 @@ namespace StoreApp.Persistence.Services
                 _context = context;
             }
 
-            public async Task<BaseResponse<string?>> CreateProduct(ProductCreateDto dto)
+            public async Task<BaseResponse<string?>> CreateProduct(ProductCreateDto dto, string userId)
             {
                 var product = new Product
                 {
                     Name = dto.Name,
                     Price = dto.Price,
-                    Stock = dto.Stock
+                    Stock = dto.Stock,
+                    UserId = userId
+
                 };
 
                 _context.Products.Add(product);
@@ -42,34 +44,45 @@ namespace StoreApp.Persistence.Services
                 return new BaseResponse<string?>("Product created successfully", HttpStatusCode.Created);
             }
 
-            public async Task<BaseResponse<string?>> UpdateProductAsync(ProductUpdateDto dto)
+            public async Task<BaseResponse<string?>> UpdateProductAsync(ProductUpdateDto dto, string userId)
             {
                 var product = await _context.Products.FindAsync(dto.Id);
+
                 if (product == null)
-                    return new BaseResponse<string?>("Product not found", HttpStatusCode.NotFound);
+                {
+                    return new BaseResponse<string>("Məhsul tapılmadı",  HttpStatusCode.NotFound);
+                }
+
+                if (product.UserId != userId)
+                {
+                    return new BaseResponse<string>("Bu məhsulu dəyişmək səlahiyyətiniz yoxdur", false, HttpStatusCode.Forbidden);
+                }
 
                 product.Name = dto.Name;
                 product.Price = dto.Price;
-                product.Stock = dto.Stock;
 
+                _context.Products.Update(product);
                 await _context.SaveChangesAsync();
-                return new BaseResponse<string?>("Product updated successfully", HttpStatusCode.OK);
+
+                return new BaseResponse<string>("Məhsul yeniləndi",  HttpStatusCode.OK);
             }
 
-            public async Task<BaseResponse<string?>> DeleteProductAsync(ProductDeleteDto dto)
+            public async Task<BaseResponse<string>> DeleteProductAsync(ProductDeleteDto dto, string userId)
             {
-                var product = await _context.Products.FindAsync(dto.Id);
-                if (product == null)
-                    return new BaseResponse<string?>("Product not found", HttpStatusCode.NotFound);
+                var product = await _context.Products.FirstOrDefaultAsync(p => p.Id == dto.Id);
 
-                if (product.UserId != dto.UserId)
-                    return new BaseResponse<string?>("Unauthorized", HttpStatusCode.Forbidden);
+                if (product == null)
+                    return new BaseResponse<string>("Məhsul tapılmadı.",HttpStatusCode.NotFound);
+
+                if (product.UserId != userId)
+                    return new BaseResponse<string>("Bu məhsulu silmək icazəniz yoxdur.",HttpStatusCode.BadRequest);
 
                 _context.Products.Remove(product);
                 await _context.SaveChangesAsync();
 
-                return new BaseResponse<string?>("Product deleted", HttpStatusCode.OK);
+                return new BaseResponse<string>("Məhsul uğurla silindi.", HttpStatusCode.OK);
             }
+
 
 
             public async Task<BaseResponse<ProductGetDto>> GetProductByIdAsync(Guid id)

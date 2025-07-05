@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.ProductDtos;
+using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -18,6 +19,13 @@ namespace StoreApp.WebApi.Controllers;
         {
             _productService = productService;
         }
+    [HttpGet]
+    public async Task<IActionResult> GetAll()
+    {
+        var result = await _productService.GetAllProducts();
+        return StatusCode((int)result.StatusCode, result);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetById(Guid id)
     {
@@ -30,12 +38,11 @@ namespace StoreApp.WebApi.Controllers;
     [Authorize(Roles = "Seller")]
     public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
     {
-        var userId = GetUserIdFromToken(); // string olacaq
+        var userId = GetUserIdFromToken();
         if (userId == null)
             return Unauthorized();
 
-        dto.UserId = userId; // birbaşa mənimsədilir
-        var result = await _productService.CreateProduct(dto);
+        var result = await _productService.CreateProduct(dto, userId);
         return StatusCode((int)result.StatusCode, result);
     }
 
@@ -49,30 +56,29 @@ namespace StoreApp.WebApi.Controllers;
             return Unauthorized();
 
         dto.Id = id;
-        dto.UserId = userId; // string tipində birbaşa mənimsədilir
 
-        var result = await _productService.UpdateProductAsync(dto);
+        var result = await _productService.UpdateProductAsync(dto, userId);
         return StatusCode((int)result.StatusCode, result);
     }
+
 
 
     // DELETE /api/products/{id}
-    [HttpDelete("{id}")]
-    [Authorize(Roles = "Seller")]
-    public async Task<IActionResult> Delete(Guid id)
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete([FromBody] ProductDeleteDto dto)
     {
-        var userId = GetUserIdFromToken();
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         if (userId == null)
             return Unauthorized();
 
-        var dto = new ProductDeleteDto
-        {
-            Id = id,
-            UserId = userId
-        };
+        var result = await _productService.DeleteProductAsync(dto, userId);
 
-        var result = await _productService.DeleteProductAsync(dto);
-        return StatusCode((int)result.StatusCode, result);
+        if (!result.Success)
+            return BadRequest(result.Message);
+
+        return Ok(result.Message);
     }
+
 
 }

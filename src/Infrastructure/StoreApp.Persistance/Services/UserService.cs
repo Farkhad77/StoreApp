@@ -101,6 +101,7 @@ namespace StoreApp.Persistence.Services
         {
             new Claim(ClaimTypes.Email, user.Email!),
             new Claim(ClaimTypes.NameIdentifier, user.Id),
+             new Claim(ClaimTypes.Role, "Admin") 
         };
 
             var tokenDescriptor = new SecurityTokenDescriptor

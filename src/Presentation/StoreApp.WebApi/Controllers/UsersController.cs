@@ -36,6 +36,7 @@ namespace StoreApp.WebApi.Controllers
 
         // GET /api/users/{id}
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetUserById(string id)
         {
             var user = await _userManager.FindByIdAsync(id);

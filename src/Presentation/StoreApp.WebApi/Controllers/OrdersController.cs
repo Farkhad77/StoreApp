@@ -1,43 +1,56 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StoreApp.Application.Abstracts.Services;
+using StoreApp.Application.DTOs.OrderDtos;
+using StoreApp.Application.Shared;
+using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace StoreApp.WebApi.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class OrdersController : ControllerBase
+    [Route("api/[controller]")]
+    public class OrdersController : BaseController
     {
-        // GET: api/<OrdersController>
-        [HttpGet]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        private readonly IOrderService _orderService;
 
-        // GET api/<OrdersController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
+       
+        public OrdersController(IOrderService orderService)
         {
-            return "value";
+            _orderService = orderService;
         }
-
-        // POST api/<OrdersController>
+        [Authorize]
         [HttpPost]
-        public void Post([FromBody] string value)
+        public async Task<IActionResult> CreateOrder([FromBody] OrderCreateDto dto)
         {
-        }
+            var userId = GetUserIdFromToken();
+            if (userId is null)
+            {
+                return Unauthorized(new BaseResponse<string>(
+                    "İstifadəçi tapılmadı", false, HttpStatusCode.Unauthorized));
+            }
 
-        // PUT api/<OrdersController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
+            var result = await _orderService.CreateOrderAsync(dto,userId);
+            return StatusCode((int)result.StatusCode, result);
         }
-
-        // DELETE api/<OrdersController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
+        
+        [HttpGet("my-orders")]
+        [Authorize(Roles = "Buyer")]
+        public async Task<IActionResult> GetMyOrders()
         {
+            var userId = GetUserIdFromToken(); // BaseController-dən gəlir
+            var orders = await _orderService.GetMyOrdersAsync(userId);
+            return Ok(orders);
+        }
+        
+        [HttpGet("my-sales")]
+        [Authorize(Roles = "Seller")]
+        public async Task<IActionResult> GetMySales()
+        {
+            var sellerId = GetUserIdFromToken();
+            var sales = await _orderService.GetMySalesAsync(sellerId);
+            return Ok(sales);
         }
     }
 }

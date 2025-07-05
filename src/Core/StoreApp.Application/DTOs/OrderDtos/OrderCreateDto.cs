@@ -9,7 +9,9 @@ namespace StoreApp.Application.DTOs.OrderDtos
 {
     public record class OrderCreateDto
     {
-       public List<Product> Products { get; set; } = new();
+        public List<Guid> ProductIds { get; set; } // Çoxlu məhsul
+        public string UserId { get; set; } = null!;
+
 
     }
 }

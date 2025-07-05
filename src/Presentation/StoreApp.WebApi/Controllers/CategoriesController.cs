@@ -22,7 +22,7 @@ namespace StoreApp.WebApi.Controllers
         private ICategoryService _categoryService { get; }
       
        
-        [HttpPost("custom-route")]
+       /* [HttpPost("custom-route")]
         [Authorize]
         [ProducesResponseType(typeof(BaseResponse<CategoryUpdateDto>), (int)HttpStatusCode.Created)]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.BadRequest)]
@@ -31,7 +31,7 @@ namespace StoreApp.WebApi.Controllers
         {
             var result = await _categoryService.AddAsync(dto);
             return StatusCode((int)result.StatusCode, result);
-        }
+        }*/
 
         // GET api/<CategoriesController>/5
         [HttpGet]

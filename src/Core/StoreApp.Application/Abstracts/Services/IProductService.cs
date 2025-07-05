@@ -10,9 +10,9 @@ namespace StoreApp.Application.Abstracts.Services
 {
     public interface IProductService
     {
-        Task<BaseResponse<string?>> CreateProduct(ProductCreateDto dto);
-        Task<BaseResponse<string?>> UpdateProductAsync(ProductUpdateDto dto);
-        Task<BaseResponse<string?>> DeleteProductAsync(ProductDeleteDto dto);
+        Task<BaseResponse<string?>> CreateProduct(ProductCreateDto dto, string userId);
+        Task<BaseResponse<string?>> UpdateProductAsync(ProductUpdateDto dto, string userId);
+        Task<BaseResponse<string?>> DeleteProductAsync(ProductDeleteDto dto, string userId);
         Task<BaseResponse<ProductGetDto>> GetProductByIdAsync(Guid id);
         Task<BaseResponse<List<ProductGetDto>>> GetAllProducts();
     }
