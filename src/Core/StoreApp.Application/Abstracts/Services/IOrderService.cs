@@ -14,7 +14,7 @@ namespace StoreApp.Application.Abstracts.Services
       
         Task<List<Order>> GetMyOrdersAsync(string userId);
         Task<List<Order>> GetMySalesAsync(string userId);
-        Task<BaseResponse<OrderGetDto>> GetOrderByIdAsync(OrderGetDto dto);
+        Task<BaseResponse<OrderGetDto>> GetOrderByIdAsync(Guid id);
         Task<BaseResponse<string>> CreateOrderAsync(OrderCreateDto dto,string userId);
     }
 }

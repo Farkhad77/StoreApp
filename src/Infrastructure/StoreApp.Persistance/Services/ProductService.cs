@@ -34,7 +34,8 @@ namespace StoreApp.Persistence.Services
                     Name = dto.Name,
                     Price = dto.Price,
                     Stock = dto.Stock,
-                    UserId = userId
+                    UserId = userId,
+                    CategoryId= dto.CategoryId
 
                 };
 
