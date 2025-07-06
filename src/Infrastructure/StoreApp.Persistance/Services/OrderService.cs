@@ -4,6 +4,7 @@ using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.OrderDtos;
 using StoreApp.Application.Shared;
 using StoreApp.Domain.Entities;
+using StoreApp.Domain.Enums;
 using StoreApp.Persistence.Contexts;
 using System;
 using System.Collections.Generic;
@@ -24,7 +25,7 @@ namespace StoreApp.Persistence.Services
             _orderRepository = orderRepository;
         }
 
-        public async Task<BaseResponse<string>> CreateOrderAsync( OrderCreateDto dto, string userId)
+        public async Task<BaseResponse<string>> CreateOrderAsync(OrderCreateDto dto, string userId)
         {
             if (dto.ProductIds == null || !dto.ProductIds.Any())
                 return new BaseResponse<string>("Məhsul siyahısı boşdur.", false, HttpStatusCode.BadRequest);
@@ -36,22 +37,42 @@ namespace StoreApp.Persistence.Services
             if (products.Count != dto.ProductIds.Count)
                 return new BaseResponse<string>("Bəzi məhsullar tapılmadı.", false, HttpStatusCode.NotFound);
 
+            var orderId = Guid.NewGuid();
+
             var order = new Order
             {
-                Id = Guid.NewGuid(),
+                Id = orderId,
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow,
+                OrderStatus = OrderStatus.Pending.ToString(),
                 OrderProducts = products.Select(p => new OrderProduct
                 {
-                    ProductId = p.Id
+                    ProductId = p.Id,
+                    OrderId = orderId,
+                    OrderCount = dto.OrderCount,
+                    Price = dto.Price,
+                    CreatedAt = DateTime.UtcNow
                 }).ToList()
             };
 
             _context.Orders.Add(order);
-            await _context.SaveChangesAsync();
+            // await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return new BaseResponse<string>(
+                    $"Xəta baş verdi: {ex.InnerException?.Message ?? ex.Message}",
+                    false,
+                    HttpStatusCode.InternalServerError);
+            }
 
             return new BaseResponse<string>("Sifariş uğurla yaradıldı.", true, HttpStatusCode.Created);
         }
+
+
 
 
         public async Task<List<Order>> GetMyOrdersAsync(string userId)

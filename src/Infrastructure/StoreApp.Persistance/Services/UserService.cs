@@ -6,6 +6,7 @@ using StoreApp.Application.DTOs.UserDtos;
 using StoreApp.Application.Shared;
 using StoreApp.Application.Shared.Settings;
 using StoreApp.Domain.Entities;
+using StoreApp.Domain.Enums;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -97,13 +98,24 @@ namespace StoreApp.Persistence.Services
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtSetting.SecretKey);
 
-            var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Email, user.Email!),
-            new Claim(ClaimTypes.NameIdentifier, user.Id),
-             new Claim(ClaimTypes.Role, "Admin") 
-        };
+            // İstifadəçinin rollarını al
+            var userRoles = await _userManager.GetRolesAsync(user);
 
+            // Əsas claim-lər
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.Email, user.Email!),
+        new Claim(ClaimTypes.NameIdentifier, user.Id),
+        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
+    };
+
+            // Rolları JWT-yə əlavə et
+            foreach (var role in userRoles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+
+            // Token ayarları
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
@@ -113,6 +125,7 @@ namespace StoreApp.Persistence.Services
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
 
+            // Token və refresh token yarat
             var token = tokenHandler.CreateToken(tokenDescriptor);
             var jwt = tokenHandler.WriteToken(token);
 
@@ -130,6 +143,7 @@ namespace StoreApp.Persistence.Services
                 ExpireDate = tokenDescriptor.Expires!.Value
             };
         }
+
         public async Task<BaseResponse<TokenResponse>> RefreshTokenAsync(RefreshTokenRequest request)
         {
             var principal = GetPrincipalFromExpiredToken(request.AccessToken);
