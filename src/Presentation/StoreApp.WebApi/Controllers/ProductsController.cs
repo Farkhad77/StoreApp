@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.ProductDtos;
+using StoreApp.Application.Shared;
 using System.Security.Claims;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -35,7 +36,7 @@ namespace StoreApp.WebApi.Controllers;
 
     // POST /api/products
     [HttpPost]
-    [Authorize(Roles = "Seller")]
+    [Authorize(Policy = Permissions.Product.Create)]
     public async Task<IActionResult> Create([FromBody] ProductCreateDto dto)
     {
         var userId = GetUserIdFromToken();
@@ -48,7 +49,7 @@ namespace StoreApp.WebApi.Controllers;
 
     // PUT /api/products/{id}
     [HttpPut("{id}")]
-    [Authorize(Roles = "Seller")]
+    [Authorize(Policy = Permissions.Product.Update)]
     public async Task<IActionResult> Update(Guid id, [FromBody] ProductUpdateDto dto)
     {
         var userId = GetUserIdFromToken();
@@ -66,7 +67,7 @@ namespace StoreApp.WebApi.Controllers;
     // DELETE /api/products/{id}
 
     [HttpDelete]
-    [Authorize(Roles = "Admin,Moderator,Seller")]
+    [Authorize(Policy = Permissions.Product.Delete)]
     public async Task<IActionResult> Delete([FromBody] ProductDeleteDto dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

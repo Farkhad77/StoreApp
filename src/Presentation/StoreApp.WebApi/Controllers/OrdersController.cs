@@ -36,7 +36,7 @@ namespace StoreApp.WebApi.Controllers
         }
         
         [HttpGet("my-orders")]
-        [Authorize(Roles = "Buyer")]
+        [Authorize(Policy = Permissions.Order.GetMyOrders)]
         public async Task<IActionResult> GetMyOrders()
         {
             var userId = GetUserIdFromToken(); // BaseController-dən gəlir
@@ -45,7 +45,7 @@ namespace StoreApp.WebApi.Controllers
         }
         
         [HttpGet("my-sales")]
-        [Authorize(Roles = "Seller")]
+        [Authorize(Policy = Permissions.Order.GetMySales)]
         public async Task<IActionResult> GetMySales()
         {
             var sellerId = GetUserIdFromToken();

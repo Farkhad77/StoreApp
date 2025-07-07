@@ -79,12 +79,14 @@ namespace StoreApp.Application.Shared
             public const string Update = "Role.Update";
             public const string Delete = "Role.Delete";
             public const string GetAllPermissions = "Role.GetAllPermissions";
+            public const string GetAllRoles = "Role.GetAllRoles";
             public static List<string> All = new()
             {
                 Create,
                 Update,
                 Delete,
-                GetAllPermissions
+                GetAllPermissions,
+                GetAllRoles
             };
         }
         public static class User
