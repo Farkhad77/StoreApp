@@ -73,7 +73,7 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 
 }).AddEntityFrameworkStores<StoreAppDbContext>()
     .AddDefaultTokenProviders();
-
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JWTSettings>();
 builder.Services.AddAuthentication(options =>
