@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
+using StoreApp.Infrastructure.Services;
 using StoreApp.Persistence.Repositories;
 using StoreApp.Persistence.Services;
 using StoreApp.Persistence.Services.StoreApp.Persistence.Services;
@@ -33,7 +34,7 @@ namespace StoreApp.Persistence
             services.AddScoped<IOrderService, OrderService>();
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IReviewService, ReviewService>();
-           
+            services.AddScoped<IEmailService, EmailService>();
             #endregion
 
         }

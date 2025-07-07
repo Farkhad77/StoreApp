@@ -5,6 +5,7 @@ using StoreApp.Application.DTOs.OrderDtos;
 using StoreApp.Application.Shared;
 using StoreApp.Domain.Entities;
 using StoreApp.Domain.Enums;
+using StoreApp.Infrastructure.Services;
 using StoreApp.Persistence.Contexts;
 using System;
 using System.Collections.Generic;
@@ -18,11 +19,14 @@ namespace StoreApp.Persistence.Services
     public class OrderService : IOrderService
     {
         private readonly StoreAppDbContext _context;
+        private readonly IEmailService _emailService;
         IOrderRepository _orderRepository;
-        public OrderService(StoreAppDbContext context,IOrderRepository orderRepository)
+       
+        public OrderService(StoreAppDbContext context,IOrderRepository orderRepository, IEmailService emailService)
         {
             _context = context;
             _orderRepository = orderRepository;
+            _emailService = emailService;
         }
 
         public async Task<BaseResponse<string>> CreateOrderAsync(OrderCreateDto dto, string userId)
@@ -56,20 +60,25 @@ namespace StoreApp.Persistence.Services
             };
 
             _context.Orders.Add(order);
-            // await _context.SaveChangesAsync();
-            try
+             await _context.SaveChangesAsync();
+            // Email göndər
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user != null && !string.IsNullOrWhiteSpace(user.Email))
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (Exception ex)
-            {
-                return new BaseResponse<string>(
-                    $"Xəta baş verdi: {ex.InnerException?.Message ?? ex.Message}",
-                    false,
-                    HttpStatusCode.InternalServerError);
+                var productNames = string.Join(", ", products.Select(p => p.Name));
+                var emailBody = "<h2>Sifarişiniz uğurla yaradıldı</h2>" +
+                                $"<p><strong>Sifariş ID:</strong> {orderId}</p>" +
+                                $"<p><strong>Məhsullar:</strong> {productNames}</p>" +
+                                $"<p><strong>Status:</strong> {order.OrderStatus}</p>" +
+                                $"<p><strong>Tarix:</strong> {DateTime.UtcNow:yyyy-MM-dd HH:mm}</p>";
+
+                await _emailService.SendEmailAsync(user.Email, "Sifarişiniz qəbul edildi", emailBody);
             }
 
             return new BaseResponse<string>("Sifariş uğurla yaradıldı.", true, HttpStatusCode.Created);
+
+            // ⛑ Ehtiyat olaraq sonda bu da olsun (əgər lazım gələrsə)
+            return new BaseResponse<string>("Naməlum xəta baş verdi.", false, HttpStatusCode.InternalServerError);
         }
 
 
