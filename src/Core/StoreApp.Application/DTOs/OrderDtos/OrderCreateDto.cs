@@ -13,7 +13,7 @@ namespace StoreApp.Application.DTOs.OrderDtos
         [JsonPropertyName("productIds")]
         public List<Guid> ProductIds { get; set; } // Çoxlu məhsul
         public int OrderCount { get; set; } // Sifariş sayı
-        public decimal Price { get; set; } // Sifariş qiyməti
+       
 
 
     }

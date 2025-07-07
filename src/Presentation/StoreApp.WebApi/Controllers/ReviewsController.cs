@@ -53,6 +53,7 @@ namespace StoreApp.WebApi.Controllers
             return Ok(new { success = true, data = review });
         }
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteReview(Guid id)
         {
             var userId = GetUserIdFromToken();

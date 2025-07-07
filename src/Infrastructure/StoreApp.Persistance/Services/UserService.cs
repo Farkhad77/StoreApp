@@ -200,6 +200,22 @@ namespace StoreApp.Persistence.Services
             rng.GetBytes(randomNumber);
             return Convert.ToBase64String(randomNumber);
         }
+        public async Task<BaseResponse<string>> AddUserToRoleAsync(string userId, string roleName)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return new BaseResponse<string>("İstifadəçi tapılmadı.", false, HttpStatusCode.NotFound);
+
+            var roleExists = await _userManager.IsInRoleAsync(user, roleName);
+            if (roleExists)
+                return new BaseResponse<string>($"İstifadəçi artıq '{roleName}' roluna sahibdir.", false, HttpStatusCode.BadRequest);
+
+            var result = await _userManager.AddToRoleAsync(user, roleName);
+            if (!result.Succeeded)
+                return new BaseResponse<string>("Rol əlavə edilərkən xəta baş verdi.", false, HttpStatusCode.InternalServerError);
+
+            return new BaseResponse<string>($"{roleName} rolu istifadəçiyə uğurla əlavə olundu.", true, HttpStatusCode.OK);
+        }
     }
 }
 

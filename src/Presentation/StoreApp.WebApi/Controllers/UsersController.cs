@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using StoreApp.Application.Abstracts.Services;
+using StoreApp.Application.DTOs.UserDtos;
 using StoreApp.Domain.Entities;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -12,10 +14,12 @@ namespace StoreApp.WebApi.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
+        private readonly IUserService _userService;
 
-        public UsersController(UserManager<User> userManager)
+        public UsersController(UserManager<User> userManager, IUserService userService)
         {
             _userManager = userManager;
+            _userService = userService;
         }
 
         // GET /api/users
@@ -52,6 +56,13 @@ namespace StoreApp.WebApi.Controllers
             };
 
             return Ok(userDto);
+        }
+        [HttpPost("assign-role")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> AssignRole([FromBody] UserAssignRoleDto dto)
+        {
+            var result = await _userService.AddUserToRoleAsync(dto.UserId, dto.RoleName);
+            return StatusCode((int)result.StatusCode, result);
         }
 
     }

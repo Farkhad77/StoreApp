@@ -14,4 +14,10 @@
     <ProjectReference Include="..\StoreApp\StoreApp.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Validations\ReviewValidations\" />
+    <Folder Include="Validations\ProductValidations\" />
+    <Folder Include="Validations\OrderValidations\" />
+  </ItemGroup>
+
 </Project>
