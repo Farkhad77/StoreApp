@@ -13,5 +13,6 @@ public class Order : BaseEntity
     public string UserId { get; set; }
     public User user { get; set; }
     public ICollection<OrderProduct> OrderProducts { get; set; }
+    public decimal TotalPrice { get; set; } 
 
 }

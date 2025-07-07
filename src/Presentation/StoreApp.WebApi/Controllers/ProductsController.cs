@@ -66,6 +66,7 @@ namespace StoreApp.WebApi.Controllers;
     // DELETE /api/products/{id}
 
     [HttpDelete]
+    [Authorize(Roles = "Admin,Moderator,Seller")]
     public async Task<IActionResult> Delete([FromBody] ProductDeleteDto dto)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -43,7 +43,7 @@ namespace StoreApp.WebApi.Controllers
 
 
         [HttpPost]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Create([FromBody] CategoryCreateDto dto)
         {
             var result = await _categoryService.AddAsync(dto);
@@ -52,7 +52,7 @@ namespace StoreApp.WebApi.Controllers
 
        
         [HttpDelete("{id}")]
-        [Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin,Moderator")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var result = await _categoryService.DeleteAsync(id);

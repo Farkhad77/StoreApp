@@ -41,26 +41,46 @@ namespace StoreApp.Persistence.Services
             if (products.Count != dto.ProductIds.Count)
                 return new BaseResponse<string>("Bəzi məhsullar tapılmadı.", false, HttpStatusCode.NotFound);
 
-            var orderId = Guid.NewGuid();
+            // Stok yoxlaması
+            foreach (var product in products)
+            {
+                if (product.Stock < dto.OrderCount)
+                {
+                    return new BaseResponse<string>($"'{product.Name}' üçün maksimum {product.Stock} ədəd sifariş edə bilərsiniz.", false, HttpStatusCode.BadRequest);
+                }
+            }
 
+            var orderId = Guid.NewGuid();
+            var totalPrice = products.Sum(p => p.Price * dto.OrderCount);
             var order = new Order
             {
                 Id = orderId,
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 OrderStatus = OrderStatus.Pending.ToString(),
+                TotalPrice = totalPrice,
+
                 OrderProducts = products.Select(p => new OrderProduct
                 {
                     ProductId = p.Id,
                     OrderId = orderId,
+                 
                     OrderCount = dto.OrderCount,
-                    Price = dto.Price,
+                    Price = p.Price, // Məhsulun öz qiyməti istifadə olunur
                     CreatedAt = DateTime.UtcNow
                 }).ToList()
             };
 
             _context.Orders.Add(order);
-             await _context.SaveChangesAsync();
+
+            // Stokdan çıx
+            foreach (var product in products)
+            {
+                product.Stock-= dto.OrderCount;
+            }
+
+            await _context.SaveChangesAsync();
+
             // Email göndər
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user != null && !string.IsNullOrWhiteSpace(user.Email))
@@ -70,16 +90,15 @@ namespace StoreApp.Persistence.Services
                                 $"<p><strong>Sifariş ID:</strong> {orderId}</p>" +
                                 $"<p><strong>Məhsullar:</strong> {productNames}</p>" +
                                 $"<p><strong>Status:</strong> {order.OrderStatus}</p>" +
+                                $"<p><strong>Umumi mebleg:</strong> {order.TotalPrice}</p>" +
                                 $"<p><strong>Tarix:</strong> {DateTime.UtcNow:yyyy-MM-dd HH:mm}</p>";
 
                 await _emailService.SendEmailAsync(user.Email, "Sifarişiniz qəbul edildi", emailBody);
             }
 
             return new BaseResponse<string>("Sifariş uğurla yaradıldı.", true, HttpStatusCode.Created);
-
-            // ⛑ Ehtiyat olaraq sonda bu da olsun (əgər lazım gələrsə)
-            return new BaseResponse<string>("Naməlum xəta baş verdi.", false, HttpStatusCode.InternalServerError);
         }
+
 
 
 

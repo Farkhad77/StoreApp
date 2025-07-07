@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.UserDtos;
 using StoreApp.Application.Shared;
@@ -38,6 +39,7 @@ namespace StoreApp.WebApi.Controllers
         }
 
         [HttpPost("refresh token")]
+        [Authorize]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(BaseResponse<string>), (int)HttpStatusCode.BadRequest)]
