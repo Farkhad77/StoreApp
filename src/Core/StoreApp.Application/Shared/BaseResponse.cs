@@ -39,5 +39,11 @@ namespace StoreApp.Application.Shared
             Data = data;
             StatusCode = statusCode;
         }
+        public BaseResponse(T data, HttpStatusCode statusCode)
+        {
+            Data = data;
+            StatusCode = statusCode;
+            Success = true;
+        }
     }
 }
