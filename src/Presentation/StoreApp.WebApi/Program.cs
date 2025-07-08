@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using StoreApp.Application.Shared.Settings;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
+using StoreApp.WebApi;
+using StoreApp.Application.Shared.Helpers;
 
 
 
@@ -76,6 +78,16 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 builder.Services.Configure<JWTSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JWTSettings>();
+builder.Services.AddAuthorization(options =>
+{
+    foreach (var permission in PermissionHelper.GetAllPermissionsList())
+    {
+        options.AddPolicy(permission, policy =>
+        {
+            policy.RequireClaim("Permission", permission);
+        });
+    }
+});
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -99,6 +111,7 @@ builder.Services.AddAuthentication(options =>
     });
 builder.Services.RegisterService();
 
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -112,6 +125,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
 

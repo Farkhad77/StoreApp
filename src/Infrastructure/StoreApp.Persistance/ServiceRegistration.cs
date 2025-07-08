@@ -22,8 +22,8 @@ namespace StoreApp.Persistence
            
             services.AddScoped<IOrderRepository,OrderRepository>();
             services.AddScoped<IProductRepository,ProductRepository>();
-            services.AddScoped<IFavoriteRepository,FavoriteRepository>();
-           
+            services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
             #endregion
 
             #region Services
@@ -35,6 +35,8 @@ namespace StoreApp.Persistence
             services.AddScoped<IRoleService, RoleService>();
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IFavoriteService,FavoriteService>();
+            //services.AddScoped<IFileUploadService, FileUploadService>();
             #endregion
 
         }

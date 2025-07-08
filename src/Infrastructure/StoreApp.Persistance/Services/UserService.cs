@@ -25,14 +25,16 @@ namespace StoreApp.Persistence.Services
         private readonly SignInManager<User> _signInManager;
         private readonly JWTSettings _jwtSetting;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly IRoleService _roleService;
 
         public UserService(UserManager<User> userManager, SignInManager<User> signInManager, 
-            IOptions<JWTSettings> jwtSetting, RoleManager<IdentityRole> roleManager)
+            IOptions<JWTSettings> jwtSetting, RoleManager<IdentityRole> roleManager,IRoleService roleservice)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtSetting = jwtSetting.Value;
             _roleManager = roleManager;
+            _roleService = roleservice;
         }
 
         public async Task<BaseResponse<string>> RegisterAsync(UserRegisterDto dto)
@@ -113,6 +115,11 @@ namespace StoreApp.Persistence.Services
             foreach (var role in userRoles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
+            }
+            var permissions = _roleService.GetPermissionsByRoles(userRoles.ToList());
+            foreach (var permission in permissions)
+            {
+                claims.Add(new Claim("permission", permission));
             }
 
             // Token ayarları

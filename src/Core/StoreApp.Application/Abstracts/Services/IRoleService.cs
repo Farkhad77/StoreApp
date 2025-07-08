@@ -12,6 +12,7 @@ namespace StoreApp.Application.Abstracts.Services
     {
         Task<BaseResponse<string?>> CreateRole(RoleCreateDto dto);
         Task<BaseResponse<string?>> DeleteRole(RoleDeleteDto dto);
+        List<string> GetPermissionsByRoles(List<string> roles);
     }
 
 }

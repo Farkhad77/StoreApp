@@ -7,7 +7,7 @@ using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace StoreApp.Application.Shared
 {
-   public static class Permissions
+    public static class Permissions
     {
         public static class Category
         {
@@ -72,7 +72,7 @@ namespace StoreApp.Application.Shared
               Create,
               AddRole
            };
-        } 
+        }
         public static class Role
         {
             public const string Create = "Role.Create";
@@ -106,11 +106,11 @@ namespace StoreApp.Application.Shared
         public static class Review
         {
             public const string Create = "Review.Create";
-            
+
             public const string Delete = "Review.Delete";
             public static List<string> All = new()
             {
-                Create,             
+                Create,
                 Delete
             };
         }
