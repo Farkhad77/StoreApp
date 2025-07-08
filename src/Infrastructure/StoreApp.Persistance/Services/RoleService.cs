@@ -10,6 +10,7 @@ using System.Net;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using static StoreApp.Application.Shared.Permissions;
 
 namespace StoreApp.Persistence.Services
 {
@@ -78,6 +79,46 @@ namespace StoreApp.Persistence.Services
             }
 
             return new BaseResponse<string?>($"Role '{dto.Name}' has been deleted successfully", true, HttpStatusCode.OK);
+        }
+        public List<string> GetPermissionsByRoles(List<string> roles)
+        {
+            var permissions = new List<string>();
+
+            foreach (var role in roles)
+            {
+                switch (role)
+                {
+                    case "Admin":
+                        permissions.AddRange(Category.All);
+                        permissions.AddRange(Product.All);
+                        permissions.AddRange(Order.All);
+                        permissions.AddRange(Account.All);
+                        permissions.AddRange(Role.All);
+                        permissions.AddRange(User.All);
+                        permissions.AddRange(Review.All);
+                        break;
+
+                    case "Seller":
+                        permissions.Add(Product.Create);
+                        permissions.Add(Product.Update);
+                        permissions.Add(Product.Delete);
+                        permissions.Add(Product.GetMyProducts);
+                        permissions.Add(Product.AddImage);
+                        permissions.Add(Product.DeleteImage);
+                        permissions.Add(Order.GetMySales);
+                        break;
+
+                    case "Buyer":
+                        permissions.Add(Order.Create);
+                        permissions.Add(Order.GetMyOrders);
+                        permissions.Add(Order.GetDetail);
+                        permissions.Add(Review.Create);
+                        permissions.Add(Review.Delete);
+                        break;
+                }
+            }
+
+            return permissions.Distinct().ToList();
         }
     }
 }

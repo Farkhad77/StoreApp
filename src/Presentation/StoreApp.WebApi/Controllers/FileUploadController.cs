@@ -1,43 +1,29 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using StoreApp.Application.Abstracts.Services;
+using StoreApp.Application.DTOs.FileDtos;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace StoreApp.WebApi.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     public class FileUploadController : ControllerBase
     {
-        // GET: api/<FileUploadController>
-        [HttpGet]
-        public IEnumerable<string> Get()
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> Upload([FromForm] FileUploadDto dto)
         {
-            return new string[] { "value1", "value2" };
-        }
+            if (dto.File == null || dto.File.Length == 0)
+                return BadRequest("Fayl boşdur.");
 
-        // GET api/<FileUploadController>/5
-        [HttpGet("{id}")]
-        public string Get(int id)
-        {
-            return "value";
-        }
+            var path = Path.Combine("Uploads", dto.File.FileName);
 
-        // POST api/<FileUploadController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
+            using var stream = new FileStream(path, FileMode.Create);
+            await dto.File.CopyToAsync(stream);
 
-        // PUT api/<FileUploadController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<FileUploadController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
+            return Ok("Fayl yükləndi.");
         }
     }
 }
