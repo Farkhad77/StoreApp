@@ -1,4 +1,5 @@
-﻿using System;
+﻿using StoreApp.Domain.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,8 @@ namespace StoreApp.Domain.Entities;
 
 public class Order : BaseEntity
 {
-    public string OrderStatus { get; set; } = null!;
+    public string LastNotifiedStatus { get; set; }
+    public string OrderStatus { get; set; } 
     public DateTime OrderDate { get; set; }
     public string UserId { get; set; }
     public User user { get; set; }

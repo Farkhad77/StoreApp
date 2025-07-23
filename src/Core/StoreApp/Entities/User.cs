@@ -9,7 +9,8 @@ namespace StoreApp.Domain.Entities;
 
 public class User :  IdentityUser
 {
-   
+
+    public DateTime? LastLoginDate { get; set; }
 
     public string FullName { get; set; }
     public string? RefreshToken { get; set; } 

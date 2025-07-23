@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.DTOs.OrderDtos;
 using StoreApp.Application.Shared;
+using StoreApp.Persistence.Contexts;
 using System.Net;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
@@ -14,11 +16,14 @@ namespace StoreApp.WebApi.Controllers
     public class OrdersController : BaseController
     {
         private readonly IOrderService _orderService;
+        private readonly StoreAppDbContext _context;
 
-       
-        public OrdersController(IOrderService orderService)
+
+
+        public OrdersController(IOrderService orderService,StoreAppDbContext context)
         {
             _orderService = orderService;
+            _context = context;
         }
         [Authorize]
         [HttpPost]
@@ -51,6 +56,22 @@ namespace StoreApp.WebApi.Controllers
             var sellerId = GetUserIdFromToken();
             var sales = await _orderService.GetMySalesAsync(sellerId);
             return Ok(sales);
+        }
+        [HttpPut("change-status")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> ChangeOrderStatus([FromQuery] Guid orderId, [FromQuery] string newStatus)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+                return NotFound($"Order with ID {orderId} not found.");
+
+            if (string.IsNullOrWhiteSpace(newStatus))
+                return BadRequest("Yeni status boş ola bilməz.");
+            order.OrderStatus = newStatus;
+
+            await _context.SaveChangesAsync();
+
+            return Ok($"Order status updated to '{newStatus}'.");
         }
     }
 }
