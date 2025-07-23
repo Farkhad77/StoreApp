@@ -79,17 +79,10 @@ namespace StoreApp.Persistence.Services
             {
                 return new("Email or password is wrong.", null, HttpStatusCode.NotFound);
             }
+            existedEmail.LastLoginDate = DateTime.UtcNow;
+            await _userManager.UpdateAsync(existedEmail);
 
-            /*if (!existedEmail.EmailConfirmed)
-            {
-                return new("Email is not confirmed.", null, HttpStatusCode.BadRequest);
-            }*/
 
-            SignInResult signInResult = await _signInManager.PasswordSignInAsync(dto.Email, dto.Password, true, true);
-            if (!signInResult.Succeeded)
-            {
-                return new("Email or password is wrong.", null, HttpStatusCode.NotFound);
-            }
 
             var token = await GenerateTokensAsync(existedEmail);
             return new("Token generated", token, HttpStatusCode.OK);

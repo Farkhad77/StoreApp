@@ -2,6 +2,7 @@
 using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Infrastructure.Services;
+using StoreApp.Persistence.Jobs;
 using StoreApp.Persistence.Repositories;
 using StoreApp.Persistence.Services;
 using StoreApp.Persistence.Services.StoreApp.Persistence.Services;
@@ -38,7 +39,10 @@ namespace StoreApp.Persistence
             services.AddScoped<IFavoriteService,FavoriteService>();
             //services.AddScoped<IFileUploadService, FileUploadService>();
             #endregion
-
+            #region Jobs
+            services.AddTransient<DisableInactiveUsersJob>();
+            services.AddTransient<OrderStatusMonitorJob>();
+            #endregion
         }
     }
 }

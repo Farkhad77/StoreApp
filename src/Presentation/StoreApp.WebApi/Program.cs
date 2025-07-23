@@ -14,6 +14,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using StoreApp.WebApi;
 using StoreApp.Application.Shared.Helpers;
+using Hangfire;
+using StoreApp.Persistence.Jobs;
 
 
 
@@ -24,6 +26,7 @@ builder.Services.AddValidatorsFromAssembly(typeof(CategoryCreateDtoValidator).As
 builder.Services.AddControllers();
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddHangfireServer();
 
 
 builder.Services.AddControllers();
@@ -109,6 +112,13 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(jwtSettings.SecretKey))
         };
     });
+builder.Services.AddHangfire(config =>
+{
+    config.SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
+          .UseSimpleAssemblyNameTypeSerializer()
+          .UseRecommendedSerializerSettings()
+          .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
+});
 builder.Services.RegisterService();
 
 
@@ -121,14 +131,23 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-
 app.UseHttpsRedirection();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseHangfireDashboard("/hangfire");
 app.UseStaticFiles();
 app.UseAuthentication();
 app.UseAuthorization();
-
 app.MapControllers();
+
+RecurringJob.AddOrUpdate<DisableInactiveUsersJob>(
+    "disable-inactive-users",
+    job => job.DisableUsersAsync(),
+    Cron.Minutely); // h?r g?n bir d?f? yoxlayacaq
+RecurringJob.AddOrUpdate<OrderStatusMonitorJob>(
+    "check-order-status-changes",
+    job => job.CheckOrderStatusChangesAsync(),
+    Cron.Minutely); // h?r d?qiq? yoxlay?r
 
 app.Run();

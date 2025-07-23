@@ -16,5 +16,6 @@ namespace StoreApp.Application.Abstracts.Services
         Task<List<Order>> GetMySalesAsync(string userId);
         Task<BaseResponse<OrderGetDto>> GetOrderByIdAsync(Guid id);
         Task<BaseResponse<string>> CreateOrderAsync(OrderCreateDto dto,string userId);
+        Task<BaseResponse<string>> ChangeOrderStatusAsync(Guid orderId, string newStatus);
     }
 }

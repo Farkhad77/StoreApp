@@ -154,5 +154,17 @@ namespace StoreApp.Persistence.Services
             };
             return new BaseResponse<OrderGetDto>("Data", dto, HttpStatusCode.OK);
         }
+        public async Task<BaseResponse<string>> ChangeOrderStatusAsync(Guid orderId, string newStatus)
+        {
+            var order = await _context.Orders.FindAsync(orderId);
+            if (order == null)
+                return new BaseResponse<string>(  "Sifariş tapılmadı", HttpStatusCode.NotFound);
+
+            order.OrderStatus = newStatus; // Status birbaşa string verilir
+
+            await _context.SaveChangesAsync();
+            return new BaseResponse<string>("Status yeniləndi", HttpStatusCode.OK);
+        }
+
     }
 }
