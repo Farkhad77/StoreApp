@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
+using StoreApp.Application.Shared.Settings;
 using StoreApp.Infrastructure.Services;
 using StoreApp.Persistence.Jobs;
 using StoreApp.Persistence.Repositories;
@@ -29,6 +30,7 @@ namespace StoreApp.Persistence
 
             #region Services
             services.AddScoped<ICategoryService, CategoryService>();
+
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IProductService,ProductService>();
             services.AddScoped<IFavoriteService, FavoriteService>();
@@ -37,6 +39,7 @@ namespace StoreApp.Persistence
             services.AddScoped<IReviewService, ReviewService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFavoriteService,FavoriteService>();
+            services.AddScoped<IPhotoService, PhotoService>();
             //services.AddScoped<IFileUploadService, FileUploadService>();
             #endregion
             #region Jobs
