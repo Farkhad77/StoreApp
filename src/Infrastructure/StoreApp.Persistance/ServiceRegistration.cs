@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using StoreApp.Application.Abstracts.Rabbit;
 using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
 using StoreApp.Application.Shared.Settings;
@@ -46,6 +47,8 @@ namespace StoreApp.Persistence
             services.AddTransient<DisableInactiveUsersJob>();
             services.AddTransient<OrderStatusMonitorJob>();
             #endregion
+            services.AddSingleton<IRabbitMqProducer, RabbitMqProducer>();
+
         }
     }
 }
