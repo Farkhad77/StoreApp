@@ -2,7 +2,6 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
-using System.Threading.Tasks;
 using StoreApp.Application.Abstracts.Rabbit;
 
 public class RabbitMqProducer : IRabbitMqProducer
@@ -14,7 +13,12 @@ public class RabbitMqProducer : IRabbitMqProducer
         _configuration = configuration;
     }
 
-    public async Task SendMessageAsync<T>(T message)
+    public Task SendMessageAsync<T>(T message)
+    {
+        return SendMessageAsync(message, "test-queue");
+    }
+
+    public Task SendMessageAsync<T>(T message, string queueName)
     {
         var factory = new ConnectionFactory
         {
@@ -23,11 +27,11 @@ public class RabbitMqProducer : IRabbitMqProducer
             Password = _configuration["RabbitMQ:Password"] ?? "guest"
         };
 
-        await using var connection = await factory.CreateConnectionAsync();
-        await using var channel = await connection.CreateChannelAsync();
+        using var connection = factory.CreateConnection();
+        using var channel = connection.CreateModel();
 
-        await channel.QueueDeclareAsync(
-            queue: "test-queue",
+        channel.QueueDeclare(
+            queue: queueName,
             durable: false,
             exclusive: false,
             autoDelete: false,
@@ -36,11 +40,14 @@ public class RabbitMqProducer : IRabbitMqProducer
         var json = JsonSerializer.Serialize(message);
         var body = Encoding.UTF8.GetBytes(json);
 
-        await channel.BasicPublishAsync(
-    exchange: "",
-    routingKey: "test-queue",
-    body: body);
-    }
+        channel.BasicPublish(
+            exchange: "",
+            routingKey: queueName,
+            basicProperties: null,
+            body: body);
 
+        return Task.CompletedTask;
+    }
 }
+
 

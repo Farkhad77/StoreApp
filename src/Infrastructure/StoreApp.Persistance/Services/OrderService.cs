@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using StoreApp.Application.Abstracts.Rabbit;
 using StoreApp.Application.Abstracts.Repositories;
 using StoreApp.Application.Abstracts.Services;
+using StoreApp.Application.DTOs.EmailDtos;
 using StoreApp.Application.DTOs.OrderDtos;
 using StoreApp.Application.Shared;
 using StoreApp.Domain.Entities;
@@ -21,12 +23,17 @@ namespace StoreApp.Persistence.Services
         private readonly StoreAppDbContext _context;
         private readonly IEmailService _emailService;
         IOrderRepository _orderRepository;
-       
-        public OrderService(StoreAppDbContext context,IOrderRepository orderRepository, IEmailService emailService)
+        private readonly IRabbitMqProducer _producer;
+
+        public OrderService(StoreAppDbContext context,
+            IOrderRepository orderRepository,
+            IEmailService emailService,
+            IRabbitMqProducer producer)
         {
             _context = context;
             _orderRepository = orderRepository;
             _emailService = emailService;
+            _producer = producer;
         }
 
         public async Task<BaseResponse<string>> CreateOrderAsync(OrderCreateDto dto, string userId)
@@ -52,21 +59,21 @@ namespace StoreApp.Persistence.Services
 
             var orderId = Guid.NewGuid();
             var totalPrice = products.Sum(p => p.Price * dto.OrderCount);
+
             var order = new Order
             {
                 Id = orderId,
                 UserId = userId,
                 CreatedAt = DateTime.UtcNow,
                 OrderStatus = OrderStatus.Pending.ToString(),
+                LastNotifiedStatus = OrderStatus.Pending.ToString(),
                 TotalPrice = totalPrice,
-
                 OrderProducts = products.Select(p => new OrderProduct
                 {
                     ProductId = p.Id,
                     OrderId = orderId,
-                 
-                    OrderCount = dto.OrderCount,
-                    Price = p.Price, // Məhsulun öz qiyməti istifadə olunur
+                    OrderCount = dto.OrderCount,                
+                    Price = p.Price,
                     CreatedAt = DateTime.UtcNow
                 }).ToList()
             };
@@ -76,12 +83,21 @@ namespace StoreApp.Persistence.Services
             // Stokdan çıx
             foreach (var product in products)
             {
-                product.Stock-= dto.OrderCount;
+                product.Stock -= dto.OrderCount;
+            }
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                var errorMessage = $"Xəta baş verdi: {ex.Message} || INNER: {ex.InnerException?.Message}";
+                return new BaseResponse<string>(errorMessage, false, HttpStatusCode.InternalServerError);
             }
 
-            await _context.SaveChangesAsync();
+            //await _context.SaveChangesAsync();
 
-            // Email göndər
+            // 📧 Email RabbitMQ vasitəsilə göndərilsin
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
             if (user != null && !string.IsNullOrWhiteSpace(user.Email))
             {
@@ -90,14 +106,22 @@ namespace StoreApp.Persistence.Services
                                 $"<p><strong>Sifariş ID:</strong> {orderId}</p>" +
                                 $"<p><strong>Məhsullar:</strong> {productNames}</p>" +
                                 $"<p><strong>Status:</strong> {order.OrderStatus}</p>" +
-                                $"<p><strong>Umumi mebleg:</strong> {order.TotalPrice}</p>" +
+                                $"<p><strong>Ümumi məbləğ:</strong> {order.TotalPrice}</p>" +
                                 $"<p><strong>Tarix:</strong> {DateTime.UtcNow:yyyy-MM-dd HH:mm}</p>";
 
-                await _emailService.SendEmailAsync(user.Email, "Sifarişiniz qəbul edildi", emailBody);
+                var emailMessage = new EmailMessageDto
+                {
+                    To = user.Email,
+                    Subject = "Sifarişiniz qəbul edildi",
+                    Body = emailBody
+                };
+
+                await _producer.SendMessageAsync(emailMessage, "email-queue");
             }
 
             return new BaseResponse<string>("Sifariş uğurla yaradıldı.", true, HttpStatusCode.Created);
         }
+
 
 
 

@@ -1,22 +1,22 @@
-﻿using System.Text;
+﻿using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
+using System.Text;
 
 public class RabbitMqConsumer : BackgroundService
 {
     private readonly IConfiguration _configuration;
+    private IConnection _connection;
+    private IModel _channel;
 
     public RabbitMqConsumer(IConfiguration configuration)
     {
         _configuration = configuration;
+        InitializeRabbitMqListener();
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    private void InitializeRabbitMqListener()
     {
         var factory = new ConnectionFactory
         {
@@ -25,35 +25,45 @@ public class RabbitMqConsumer : BackgroundService
             Password = _configuration["RabbitMQ:Password"] ?? "guest"
         };
 
-        await using var connection = await factory.CreateConnectionAsync(stoppingToken);
-        await using var channel = await connection.CreateChannelAsync();
+        _connection = factory.CreateConnection();
+        _channel = _connection.CreateModel();
 
-        await channel.QueueDeclareAsync(
+        _channel.QueueDeclare(
             queue: "test-queue",
             durable: false,
             exclusive: false,
             autoDelete: false,
-            arguments: null,
-            cancellationToken: stoppingToken);
+            arguments: null);
+    }
 
-        var consumer = new AsyncEventingBasicConsumer(channel);
+    protected override Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        var consumer = new EventingBasicConsumer(_channel);
 
-        consumer.ReceivedAsync += async (sender, ea) =>
+        consumer.Received += (sender, ea) =>
         {
             var body = ea.Body.ToArray();
             var message = Encoding.UTF8.GetString(body);
-            Console.WriteLine($"Gelen mesaj: {message}");
 
-            await Task.Yield();
+            Console.WriteLine($"📩 Gələn mesaj: {message}");
+
+            // Burada istəyirsənsə JSON parse edib EmailService-ə göndərə bilərik
         };
 
-        await channel.BasicConsumeAsync(
+        _channel.BasicConsume(
             queue: "test-queue",
             autoAck: true,
-            consumer: consumer,
-            cancellationToken: stoppingToken);
-        // Task-ı dayandırılana qədər açıq saxla
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+            consumer: consumer);
+
+        return Task.CompletedTask;
+    }
+
+    public override void Dispose()
+    {
+        _channel?.Close();
+        _connection?.Close();
+        base.Dispose();
     }
 }
+
 
