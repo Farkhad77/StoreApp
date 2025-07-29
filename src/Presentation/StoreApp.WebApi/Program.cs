@@ -16,6 +16,7 @@ using StoreApp.WebApi;
 using StoreApp.Application.Shared.Helpers;
 using Hangfire;
 using StoreApp.Persistence.Jobs;
+using StackExchange.Redis;
 
 
 
@@ -120,6 +121,8 @@ builder.Services.AddHangfire(config =>
           .UseRecommendedSerializerSettings()
           .UseSqlServerStorage(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
+builder.Services.AddSingleton<IConnectionMultiplexer>(
+    ConnectionMultiplexer.Connect("localhost:6379"));
 builder.Services.RegisterService();
 
 
@@ -133,7 +136,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
+app.UseMiddleware<TokenBlacklistMiddleware>();
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHangfireDashboard("/hangfire");

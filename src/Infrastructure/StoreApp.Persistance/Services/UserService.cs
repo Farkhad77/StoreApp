@@ -26,15 +26,19 @@ namespace StoreApp.Persistence.Services
         private readonly JWTSettings _jwtSetting;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly IRoleService _roleService;
-
+        private readonly IRedisCacheService _redisCacheService;
         public UserService(UserManager<User> userManager, SignInManager<User> signInManager, 
-            IOptions<JWTSettings> jwtSetting, RoleManager<IdentityRole> roleManager,IRoleService roleservice)
+            IOptions<JWTSettings> jwtSetting, 
+            RoleManager<IdentityRole> roleManager,
+            IRoleService roleservice,
+            IRedisCacheService redisCacheService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _jwtSetting = jwtSetting.Value;
             _roleManager = roleManager;
             _roleService = roleservice;
+            _redisCacheService = redisCacheService;
         }
 
         public async Task<BaseResponse<string>> RegisterAsync(UserRegisterDto dto)
@@ -156,12 +160,19 @@ namespace StoreApp.Persistence.Services
             if (user == null)
                 return new("User not found", null, HttpStatusCode.NotFound);
 
+            // 🔐 Refresh token Redis-də qara siyahıdadırsa
+            if (await _redisCacheService.ExistsAsync($"blacklist:refresh:{request.RefreshToken}"))
+                return new("Refresh token is blacklisted", null, HttpStatusCode.Unauthorized);
+
+            // 🔐 Refresh token DB-də səhvdirsə və ya vaxtı keçibsə
             if (user.RefreshToken is null || user.RefreshToken != request.RefreshToken || user.ExpiryDate < DateTime.UtcNow)
                 return new("Invalid refresh token", null, HttpStatusCode.BadRequest);
 
+            // ✅ Yeni tokenlər yaradılır
             var newAccessToken = await GenerateTokensAsync(user);
             return new("Token refreshed", newAccessToken, HttpStatusCode.OK);
         }
+
 
         private ClaimsPrincipal? GetPrincipalFromExpiredToken(string token)
         {
