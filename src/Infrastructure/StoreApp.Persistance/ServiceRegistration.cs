@@ -41,6 +41,7 @@ namespace StoreApp.Persistence
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IFavoriteService,FavoriteService>();
             services.AddScoped<IPhotoService, PhotoService>();
+            services.AddScoped<IRedisCacheService, RedisCacheService>();
             //services.AddScoped<IFileUploadService, FileUploadService>();
             #endregion
             #region Jobs
