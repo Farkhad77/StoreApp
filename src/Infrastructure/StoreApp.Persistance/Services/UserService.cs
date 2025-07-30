@@ -91,7 +91,29 @@ namespace StoreApp.Persistence.Services
             var token = await GenerateTokensAsync(existedEmail);
             return new("Token generated", token, HttpStatusCode.OK);
         }
+        public async Task LogoutAsync(string accessToken, string? refreshToken)
+        {
+            if (string.IsNullOrWhiteSpace(accessToken))
+                throw new ArgumentException("Access token is required", nameof(accessToken));
 
+            TimeSpan expiry = GetTokenExpiry(accessToken);
+
+            // Access token-i Redis-də blacklist et
+            await _redisCacheService.SetAsync($"blacklist:access:{accessToken}", "true", expiry);
+
+            // Refresh token varsa onu da blacklist et
+            if (!string.IsNullOrEmpty(refreshToken))
+            {
+                await _redisCacheService.SetAsync($"blacklist:refresh:{refreshToken}", "true", TimeSpan.FromDays(7));
+            }
+        }
+
+        private static TimeSpan GetTokenExpiry(string token)
+        {
+            var handler = new JwtSecurityTokenHandler();
+            var jwtToken = handler.ReadJwtToken(token);
+            return jwtToken.ValidTo - DateTime.UtcNow;
+        }
         private async Task<TokenResponse> GenerateTokensAsync(User user)
         {
             var tokenHandler = new JwtSecurityTokenHandler();

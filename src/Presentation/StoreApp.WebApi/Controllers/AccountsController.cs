@@ -60,33 +60,19 @@ namespace StoreApp.WebApi.Controllers
             string accessToken = Request.Headers["Authorization"]
                 .ToString().Replace("Bearer ", "");
 
-            string? refreshToken = GetRefreshTokenFromHeader(); // Aşağıdakı metodu əlavə et
+            string? refreshToken = GetRefreshTokenFromHeader();
 
-            // Token bitmə vaxtını al
-            TimeSpan expiry = GetTokenExpiry(accessToken); // Aşağıda bu da var
-
-            // Access token Redis-ə blackliste at
-            await _redisCacheService.SetAsync($"blacklist:access:{accessToken}", "true", expiry);
-
-            // Refresh token də varsa onu da blackliste at
-            if (!string.IsNullOrEmpty(refreshToken))
-            {
-                await _redisCacheService.SetAsync($"blacklist:refresh:{refreshToken}", "true", TimeSpan.FromDays(7));
-            }
+            await _userService.LogoutAsync(accessToken, refreshToken);
 
             return Ok(new { message = "Logout successful" });
         }
-        private static TimeSpan GetTokenExpiry(string token)
-        {
-            var handler = new JwtSecurityTokenHandler();
-            var jwtToken = handler.ReadJwtToken(token);
-            var expiry = jwtToken.ValidTo;
-            return expiry - DateTime.UtcNow;
-        }
 
+        // ✅ Bunu burada əlavə et
         private string? GetRefreshTokenFromHeader()
         {
-            return Request.Headers.TryGetValue("Refresh-Token", out var value) ? value.ToString() : null;
+            return Request.Headers.TryGetValue("Refresh-Token", out var value)
+                ? value.ToString()
+                : null;
         }
 
     }
